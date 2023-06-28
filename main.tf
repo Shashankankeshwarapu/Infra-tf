@@ -48,7 +48,7 @@ resource "aws_eip" "nat" {
 
 resource "aws_nat_gateway" "main-natgw" {
   allocation_id = "${aws_eip.nat.id}"
-  subnet_id     = "${aws_subnet.subnet2.id}"
+  subnet_id     = "${aws_subnet.subnet1.id}"
 
   tags = {
     Name = "main-nat"
@@ -88,8 +88,8 @@ resource "aws_route_table_association" "public-assoc-1" {
 }
 
 
-########## PRIVATE Subnets assiosation with rotute table ######
-resource "aws_route_table_association" "private-assoc-3" {
+########## PRIVATE Subnets assiosation with route table ######
+resource "aws_route_table_association" "private-assoc-1" {
   subnet_id      = "${aws_subnet.subnet2.id}"
   route_table_id = "${aws_route_table.main-private-rt.id}"
 }
@@ -130,11 +130,11 @@ resource "aws_instance" "test-instance" {
 	ami = "ami-01ba8fe702263d044"
 	instance_type = "t2.micro"
   count = 2
-	key_name = "test"
+	key_name = "terraform"
   associate_public_ip_address  = true
   vpc_security_group_ids = [aws_security_group.security_group.id]
   subnet_id      = "${aws_subnet.subnet1.id}"
-	user_data = file("app-install1.sh")
+	user_data = file("app-install.sh")
 	tags = {
 		Name = "Terraform-${count.index}"
 	}
