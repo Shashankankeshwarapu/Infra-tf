@@ -1,4 +1,4 @@
- #################
+######### VPC ##########
 resource "aws_vpc" "main" {
   cidr_block       = "10.0.0.0/16"
   instance_tenancy = "default"
@@ -81,12 +81,12 @@ resource "aws_route_table" "main-private-rt" {
     Name = "main-private-rt"
   }
 }
+
 ######### PUBLIC Subnet assiosation with route table    ######
 resource "aws_route_table_association" "public-assoc-1" {
   subnet_id      = "${aws_subnet.subnet1.id}"
   route_table_id = "${aws_route_table.main-public-rt.id}"
 }
-
 
 ########## PRIVATE Subnets assiosation with route table ######
 resource "aws_route_table_association" "private-assoc-1" {
@@ -94,6 +94,7 @@ resource "aws_route_table_association" "private-assoc-1" {
   route_table_id = "${aws_route_table.main-private-rt.id}"
 }
 
+########## security group ######
 resource "aws_security_group" "security_group" {
   name        = "security_group"
   description = "sample security group"
@@ -113,6 +114,13 @@ resource "aws_security_group" "security_group" {
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"]
   }
+  ingress {
+    description      = "Port for Java Application"
+    from_port        = 8080
+    to_port          = 8080
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
   egress {
     from_port        = 0
     to_port          = 0
@@ -125,7 +133,7 @@ resource "aws_security_group" "security_group" {
   }
 }
 
-
+########## EC2 Instance ###########
 resource "aws_instance" "test-instance" {
 	ami = "ami-01ba8fe702263d044"
 	instance_type = "t2.micro"
@@ -141,8 +149,7 @@ resource "aws_instance" "test-instance" {
 }
 
 
-##Load Balancer ##
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group
+######### Target Group For Load Balancer #############
 resource "aws_lb_target_group" "front" {
   name     = "application-front"
   port     = 80
@@ -160,7 +167,8 @@ resource "aws_lb_target_group" "front" {
     unhealthy_threshold = 2
   }
 }
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group_attachment
+
+######### Instances Attachment to Target Group #############
 resource "aws_lb_target_group_attachment" "attachgroup" {
   count            = length(aws_instance.test-instance)
   target_group_arn = aws_lb_target_group.front.arn
@@ -169,7 +177,7 @@ resource "aws_lb_target_group_attachment" "attachgroup" {
   port             = 80
 }
 
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb
+######### Load Balancer #############
 resource "aws_lb" "front" {
   name               = "front"
   internal           = false
@@ -184,7 +192,7 @@ resource "aws_lb" "front" {
   }
 }
 
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener
+######### Listener for Load Balancer ##############
 resource "aws_lb_listener" "front_end" {
   load_balancer_arn = aws_lb.front.arn
   port              = "80"
