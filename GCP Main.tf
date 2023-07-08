@@ -16,7 +16,7 @@ resource "google_compute_subnetwork" "subnet" {
 #####VPC firewall configuration####
 resource "google_compute_firewall" "firewall" {
   name    = "samplefirewall"
-  network = "samplevpc"
+  network = google_compute_network.vpc.name
 
   allow {
     protocol = "icmp"
@@ -35,7 +35,7 @@ resource "google_compute_instance" "default" {
   name         = "sampleinstance"
   machine_type = "e2-micro"
   zone         = "us-central1-a"
-  allow_stopping_for_update = true
+  #allow_stopping_for_update = true
 
     boot_disk {
     initialize_params {
@@ -46,8 +46,8 @@ resource "google_compute_instance" "default" {
     }
 
     network_interface {
-    network = "samplevpc"
-    subnetwork = "samplesubnet"
+    network = google_compute_network.vpc.name
+    subnetwork = google_compute_subnetwork.subnet.name
     access_config {}
        }
    }
