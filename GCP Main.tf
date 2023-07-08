@@ -1,9 +1,7 @@
 ####Create VPC##########
 resource "google_compute_network" "vpc" {
-  project                 = "adept-bison-392015"
-  name                    = "samplevpc"
-  auto_create_subnetworks = false
-  mtu                     = 1460
+ name                    = "samplevpc"
+ auto_create_subnetworks = "false"
 }
 
 #####Create Subnet############
@@ -37,19 +35,19 @@ resource "google_compute_instance" "default" {
   name         = "sampleinstance"
   machine_type = "e2-micro"
   zone         = "us-central1-a"
+  allow_stopping_for_update = true
 
     boot_disk {
     initialize_params {
-      image = "Ubuntu 20.04 LTS"
-      }
-  }
-}
+   #   image = "Ubuntu 20.04 LTS"
+       image = "ubuntu-os-cloud/ubuntu-2004-lts"
 
-network_interface {
-    network = "default"
-
-    access_config {
-      // Ephemeral public IP
     }
-  }
+    }
 
+    network_interface {
+    network = "samplevpc"
+    subnetwork = "samplesubnet"
+    access_config {}
+       }
+   }
