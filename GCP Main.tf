@@ -1,7 +1,9 @@
 ####Create VPC##########
 resource "google_compute_network" "vpc" {
- name                    = "samplevpc"
- auto_create_subnetworks = "false"
+  project                 = "adept-bison-392015"
+  name                    = "samplevpc"
+  auto_create_subnetworks = false
+  mtu                     = 1460
 }
 
 #####Create Subnet############
@@ -31,10 +33,6 @@ resource "google_compute_firewall" "firewall" {
   target_tags = ["generalaccess"]
 }
 
-resource "google_compute_network" "vpc_network" {
-name = "terraform-network"
-}
-
 resource "google_compute_instance" "default" {
   name         = "sampleinstance"
   machine_type = "e2-micro"
@@ -43,15 +41,15 @@ resource "google_compute_instance" "default" {
     boot_disk {
     initialize_params {
       image = "Ubuntu 20.04 LTS"
-
-    network_interface {
-    network = "google_compute_network.vpc_network.terraform-network"
-    access_config {
-       }
       }
-     }
+  }
+}
+
+network_interface {
+    network = "default"
+
+    access_config {
+      // Ephemeral public IP
     }
-   }
-#network_interface {
-#network = "google_compute_network.vpc_network.terraform-network"
-#access_config {
+  }
+
