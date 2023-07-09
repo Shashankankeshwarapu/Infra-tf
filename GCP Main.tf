@@ -39,6 +39,7 @@ resource "google_compute_instance" "default" {
 
     boot_disk {
     initialize_params {
+   #   image = "Ubuntu 20.04 LTS"
        image = "ubuntu-os-cloud/ubuntu-2004-lts"
 
     }
@@ -61,3 +62,18 @@ resource "google_container_cluster" "primary" {
   subnetwork               = google_compute_subnetwork.subnet.name
 }
 
+resource "google_container_node_pool" "primary" {
+  name       = "sample-node-pool"
+  cluster    = google_container_cluster.primary.id
+  node_count = 1
+  node_locations = [
+    "us-central1-b", "us-central1-c"
+  ]
+     
+
+  node_config {
+    #preemptible  = false
+    machine_type = "e2-medium"
+
+  }
+}
