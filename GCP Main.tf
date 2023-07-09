@@ -39,7 +39,6 @@ resource "google_compute_instance" "default" {
 
     boot_disk {
     initialize_params {
-   #   image = "Ubuntu 20.04 LTS"
        image = "ubuntu-os-cloud/ubuntu-2004-lts"
 
     }
@@ -51,3 +50,14 @@ resource "google_compute_instance" "default" {
     access_config {}
        }
    }
+
+resource "google_container_cluster" "primary" {
+  description  = "GKE Cluster for sample project"
+  name     = "sample-gke-cluster"
+  location = "us-central1"
+  network  = google_compute_network.vpc.name
+  remove_default_node_pool = true
+  initial_node_count       = 1
+  subnetwork               = google_compute_subnetwork.subnet.name
+}
+
